@@ -1,0 +1,11 @@
+package com.cs.quiz.repository;
+
+import com.cs.quiz.entity.Question;
+import com.cs.quiz.entity.Quiz;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface QuestionRepository extends JpaRepository<Question, Long> {
+    List<Question> findAllByQuiz(Quiz quiz);
+}
