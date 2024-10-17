@@ -1,6 +1,6 @@
 package com.cs.quiz.service.impl;
 
-import com.cs.quiz.service.JDoodleAPIService;
+import com.cs.quiz.service.OnlineCompilerAPIService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -10,13 +10,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class JDoodleAPIServiceImpl implements JDoodleAPIService {
+public class OnlineCompilerAPIServiceImpl implements OnlineCompilerAPIService {
 
     private final String clientId;
     private final String clientSecret;
     private final RestTemplate restTemplate;
 
-    public JDoodleAPIServiceImpl(
+    @Value("${jdoodle.api.service.url}")
+    private String url;
+
+    public OnlineCompilerAPIServiceImpl(
             @Value("${jdoodle.api.client-id}") String clientId,
             @Value("${jdoodle.api.client-secret}") String clientSecret,
             RestTemplate restTemplate) {
@@ -25,8 +28,7 @@ public class JDoodleAPIServiceImpl implements JDoodleAPIService {
         this.restTemplate = restTemplate;
     }
 
-    public String executeCode(String code, String stdin, String language, String versionIndex) {
-        String url = "https://api.jdoodle.com/v1/execute";
+    public String executeCode(String code, String stdin, String language) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -46,7 +48,7 @@ public class JDoodleAPIServiceImpl implements JDoodleAPIService {
                 code,
                 stdin,
                 language,
-                versionIndex
+                4
         );
 
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);

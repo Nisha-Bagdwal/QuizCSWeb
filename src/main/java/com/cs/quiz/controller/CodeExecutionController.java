@@ -3,7 +3,6 @@ package com.cs.quiz.controller;
 import com.cs.quiz.dto.CodeExecutionResultDto;
 import com.cs.quiz.dto.SolutionCodeDto;
 import com.cs.quiz.service.CodeExecutionService;
-import com.cs.quiz.service.JDoodleAPIService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;

@@ -5,7 +5,7 @@ import com.cs.quiz.dto.SolutionCodeDto;
 import com.cs.quiz.entity.*;
 import com.cs.quiz.repository.*;
 import com.cs.quiz.service.CodeExecutionService;
-import com.cs.quiz.service.JDoodleAPIService;
+import com.cs.quiz.service.OnlineCompilerAPIService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,12 +22,12 @@ public class CodeExecutionServiceImpl implements CodeExecutionService {
 
     private final ProblemScoreRepository problemScoreRepository;
     private final ProblemRepository problemRepository;
-    private final JDoodleAPIService jDoodleAPIService;
+    private final OnlineCompilerAPIService onlineCompilerAPIService;
 
-    public CodeExecutionServiceImpl(ProblemScoreRepository problemScoreRepository, ProblemRepository problemRepository, JDoodleAPIService jDoodleAPIService, TestCaseRepository testCaseRepository, UserRepository userRepository) {
+    public CodeExecutionServiceImpl(ProblemScoreRepository problemScoreRepository, ProblemRepository problemRepository, OnlineCompilerAPIService onlineCompilerAPIService, TestCaseRepository testCaseRepository, UserRepository userRepository) {
         this.testCaseRepository = testCaseRepository;
         this.userRepository = userRepository;
-        this.jDoodleAPIService = jDoodleAPIService;
+        this.onlineCompilerAPIService = onlineCompilerAPIService;
         this.problemRepository = problemRepository;
         this.problemScoreRepository = problemScoreRepository;
     }
@@ -46,7 +46,7 @@ public class CodeExecutionServiceImpl implements CodeExecutionService {
 
             String input = testcase.getInput();
             String output = testcase.getOutput();
-            String response = jDoodleAPIService.executeCode(code, input, "java", "4");
+            String response = onlineCompilerAPIService.executeCode(code, input, "java");
             try {
                 JsonNode jsonNode = objectMapper.readTree(response);
                 String codeOutput = jsonNode.get("output").asText();
