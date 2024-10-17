@@ -1,5 +1,7 @@
 package com.cs.quiz.service;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface OnlineCompilerAPIService {
-    public String executeCode(String code, String stdin, String language);
+    CompletableFuture<String> executeCode(String code, String stdin, String language);
 }

@@ -6,8 +6,11 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class OnlineCompilerAPIServiceImpl implements OnlineCompilerAPIService {
@@ -28,7 +31,8 @@ public class OnlineCompilerAPIServiceImpl implements OnlineCompilerAPIService {
         this.restTemplate = restTemplate;
     }
 
-    public String executeCode(String code, String stdin, String language) {
+    @Async
+    public CompletableFuture<String> executeCode(String code, String stdin, String language) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -56,10 +60,10 @@ public class OnlineCompilerAPIServiceImpl implements OnlineCompilerAPIService {
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
-            return response.getBody();
+            return CompletableFuture.completedFuture(response.getBody());
         } else {
             // Handle error cases here
-            return "Error: " + response.getStatusCode();
+            return CompletableFuture.completedFuture("Error: " + response.getStatusCode());
         }
     }
 }
