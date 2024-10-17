@@ -7,27 +7,25 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.CompletableFuture;
 
-@Service
 public class OnlineCompilerAPIServiceImpl implements OnlineCompilerAPIService {
 
-    private final String clientId;
-    private final String clientSecret;
     private final RestTemplate restTemplate;
 
     @Value("${jdoodle.api.service.url}")
     private String url;
 
+    @Value("${jdoodle.api.client-id}")
+    private String clientId;
+
+    @Value("${jdoodle.api.client-secret}")
+    private String clientSecret;
+
     public OnlineCompilerAPIServiceImpl(
-            @Value("${jdoodle.api.client-id}") String clientId,
-            @Value("${jdoodle.api.client-secret}") String clientSecret,
             RestTemplate restTemplate) {
-        this.clientId = clientId;
-        this.clientSecret = clientSecret;
         this.restTemplate = restTemplate;
     }
 
