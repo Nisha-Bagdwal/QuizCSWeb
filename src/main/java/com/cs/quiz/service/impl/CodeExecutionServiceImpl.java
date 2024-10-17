@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class CodeExecutionServiceImpl implements CodeExecutionService {
@@ -42,27 +43,46 @@ public class CodeExecutionServiceImpl implements CodeExecutionService {
 
         List<TestCase> testCases = testCaseRepository.findAllByProblemId(problemId);
 
-        for (var testcase : testCases) {
+        // Create a list of CompletableFutures for each test case
+        List<CompletableFuture<String>> futures = testCases.stream()
+                .map(testCase -> onlineCompilerAPIService.executeCode(code, testCase.getInput(), "java")
+                        .thenApply(response -> {
+                            try {
+                                JsonNode jsonNode = objectMapper.readTree(response);
+                                String codeOutput = jsonNode.get("output").asText();
+                                boolean isMatch = testCase.getOutput().equals(codeOutput);
 
-            String input = testcase.getInput();
-            String output = testcase.getOutput();
-            String response = onlineCompilerAPIService.executeCode(code, input, "java");
-            try {
-                JsonNode jsonNode = objectMapper.readTree(response);
-                String codeOutput = jsonNode.get("output").asText();
+                                if (!isMatch) {
+                                    // Return the error response from the API if output does not match
+                                    return "Error: Test case failed for input: " + testCase.getInput() +
+                                            ". Expected: " + testCase.getOutput() + ", but got: " + codeOutput;
+                                }
+                                // Return a success message if the output matches
+                                return "SUCCESS";
+                            } catch (JsonProcessingException e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
+                ).toList();  // Convert the stream to a list of futures
 
-                if(!output.equals(codeOutput)){
-                    codeExecutionResultDto.setMessage("Test case failed!");
-                    return codeExecutionResultDto;
-                }
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+        // Wait for all async tasks to complete and gather the results
+        CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+
+        // Once all futures are completed, check results
+        allOf.join(); // Wait for all tasks to finish
+
+        // Collect results and check for errors
+        for (CompletableFuture<String> future : futures) {
+            String result = future.join(); // Get the result of each future
+            if (result.startsWith("Error:")) { // Check if it's an error response
+                codeExecutionResultDto.setMessage(result); // Set the error message
+                return codeExecutionResultDto;  // Exit early on error
             }
         }
 
+        // If all test cases pass
         addProblemScore(solution.getProblemId(), user);
-
-        codeExecutionResultDto.setMessage("SUCCESS!");
+        codeExecutionResultDto.setMessage("All test cases passed successfully!");
         return codeExecutionResultDto;
     }
 
