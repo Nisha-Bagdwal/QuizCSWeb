@@ -4,6 +4,7 @@ import com.cs.quiz.dto.UserDto;
 import com.cs.quiz.entity.*;
 import com.cs.quiz.repository.*;
 import com.cs.quiz.service.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void saveUser(UserDto userDto) {
         User user = new User();
         user.setName(userDto.getFirstName() + " " + userDto.getLastName());
